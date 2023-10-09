@@ -1,0 +1,47 @@
+import os
+import shutil
+import time
+import logging
+from datetime import datetime
+import schedule
+
+# Set up logging
+logging.basicConfig(filename='file_mover.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+source_dir = '/path/to/source_directory'
+destination_dir = '/path/to/destination_directory'
+
+def move_files():
+    try:
+        # Get a list of files in the source directory
+        files = os.listdir(source_dir)
+        
+        if files:
+            for file in files:
+                source_file = os.path.join(source_dir, file)
+                
+                # Generate a timestamp for renaming the file
+                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                new_file_name = f"{timestamp}_{file}"
+                
+                destination_file = os.path.join(destination_dir, new_file_name)
+                
+                # Move the file to the destination directory
+                shutil.move(source_file, destination_file)
+                
+                logging.info(f"Moved {file} to {destination_file}")
+                
+        else:
+            logging.info("No files to move.")
+            
+    except Exception as e:
+        logging.error(f"Error: {str(e)}")
+
+# Schedule the script to run every 30 minutes
+schedule.every(30).minutes.do(move_files)
+
+if __name__ == "__main__":
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
