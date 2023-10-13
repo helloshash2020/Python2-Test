@@ -59,5 +59,31 @@
 # Replace '/path/to/your/directory/' with the actual directory path.
 
 
+---
+- name: Read .log files and remove .log and .py files
+  hosts: your_target_host
+  become: yes  # Use if you need elevated privileges to remove files
+  tasks:
+    - name: Find .log files
+      find:
+        paths: /path/to/your/directory
+        patterns: "*.log"
+      register: log_files
+
+    - name: Display .log file content
+      command: cat {{ item.path }}
+      with_items: "{{ log_files.files }}"
+      when: log_files.matched > 0
+
+    - name: Remove .log and .py files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items:
+        - "{{ log_files.files }}"
+        - "/path/to/your/directory/*.py"
+
+# Replace 'your_target_host' with the target host you want to perform these actions on.
+# Replace '/path/to/your/directory/' with the actual directory path.
 
       
