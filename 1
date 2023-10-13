@@ -1,0 +1,14 @@
+---
+- name: Cat file with log extension and remove directory
+  hosts: your_target_host
+  tasks:
+    - name: Cat log file
+      command: cat /path/to/your/logfile.log
+      register: cat_result
+      ignore_errors: yes
+
+    - name: Remove directory
+      file:
+        path: /path/to/your/directory
+        state: absent
+      when: cat_result.failed == false
