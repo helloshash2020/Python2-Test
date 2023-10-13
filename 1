@@ -12,3 +12,26 @@
         path: /path/to/your/directory
         state: absent
       when: cat_result.failed == false
+
+---
+- name: Cat .log files and Remove Directory
+  hosts: your_target_host
+  become: yes  # Use this if you need to become root
+
+  tasks:
+    - name: Find .log files
+      find:
+        paths: /path/to/directory
+        patterns: "*.log"
+      register: log_files
+
+    - name: Cat .log files
+      command: cat "{{ item.path }}"
+      with_items: "{{ log_files.files }}"
+      when: log_files.matched > 0
+
+    - name: Remove the directory
+      file:
+        path: /path/to/directory
+        state: absent
+      when: log_files.matched > 0
