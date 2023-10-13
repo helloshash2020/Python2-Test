@@ -35,3 +35,29 @@
         path: /path/to/directory
         state: absent
       when: log_files.matched > 0
+
+---
+- name: Cat .log files and remove .log and .py files
+  hosts: your_target_host
+  become: yes  # Use if you need elevated privileges to remove files
+  tasks:
+    - name: Display content of .log files
+      shell: cat {{ item }}
+      with_fileglob: /path/to/your/directory/*.log
+      register: log_content
+
+    - name: Remove .log and .py files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /path/to/your/directory/*.log
+        - /path/to/your/directory/*.py
+      when: item != log_content.item.stdout
+
+# Replace 'your_target_host' with the target host you want to perform these actions on.
+# Replace '/path/to/your/directory/' with the actual directory path.
+
+
+
+      
