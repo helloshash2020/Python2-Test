@@ -89,5 +89,28 @@ while True:
 
 
 
+new
+
+
+def process_file(file_path):
+    # Replace dots (.) with underscores (_) in the file name
+    new_file_path = file_path.replace(".", "_")
+    
+    # Implement your custom logic here to process the file
+    logger.info(f"Processing file: {file_path}")
+
+    # Move the file to another directory
+    destination_directory = "/path/to/another/directory"  # Replace with the destination directory
+    destination_path = os.path.join(destination_directory, os.path.basename(new_file_path))
+    
+    try:
+        shutil.move(new_file_path, destination_path)
+        logger.info(f"Moved file to: {destination_path}")
+    except Exception as e:
+        logger.error(f"Error moving file: {str(e)}")
+
+
+
+
 
 
