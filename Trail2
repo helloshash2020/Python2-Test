@@ -167,6 +167,63 @@ while True:
     time.sleep(1)
 
 
+new
+
+import time
+import os
+import logging
+import schedule
+import shutil
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
+# Configure the logger at the top level
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger('my_logger')  # You can give your logger a specific name
+
+class MyHandler(FileSystemEventHandler):
+    def on_any_event(self, event):
+        if event.is_directory:
+            return
+        elif event.event_type in ('created', 'modified'):
+            file_path = event.src_path
+            logger.info(f"File {file_path} {event.event_type}")
+            process_file(file_path)
+
+def process_file(file_path):
+    # Replace dots (.) with underscores (_) in the file name
+    new_file_path = file_path.replace(".", "_")
+    
+    # Implement your custom logic here to process the file
+    logger.info(f"Processing file: {file_path}")
+
+    # Move the file to another directory
+    destination_directory = "/path/to/another/directory"  # Replace with the destination directory
+    destination_path = os.path.join(destination_directory, os.path.basename(new_file_path))
+    
+    try:
+        shutil.move(new_file_path, destination_path)
+        logger.info(f"Moved file to: {destination_path}")
+    except Exception as e:
+        logger.error(f"Error moving file: {str(e)}")
+
+path = "/path/to/your/directory"  # Replace with the directory you want to watch
+
+def watch_directory():
+    event_handler = MyHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path, recursive=False)
+    observer.start()
+
+# Schedule the watch_directory function to run every second
+schedule.every(1).seconds.do(watch_directory)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+
+
+
 
 
 
