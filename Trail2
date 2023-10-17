@@ -35,3 +35,59 @@ schedule.every(1).seconds.do(watch_directory)
 while True:
     schedule.run_pending()
     time.sleep(1)
+
+
+
+
+
+new
+import time
+import logging
+import os
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import subprocess
+
+# Configure the logger
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name)
+
+class MyHandler(FileSystemEventHandler):
+    def on_any_event(self, event):
+        if event.is_directory:
+            return
+        elif event.event_type in ('created', 'modified'):
+            file_path = event.src_path
+            logger.info(f"File {file_path} {event.event_type}")
+            process_file(file_path)
+
+def process_file(file_path):
+    # Replace dots with underscores in the file name
+    file_name = os.path.basename(file_path)
+    modified_file_name = file_name.replace('.', '_')
+
+    # Implement your custom logic here to process the file
+    logger.info(f"Processing file: {file_path}")
+
+    # Invoke another Python code with the modified file name as a parameter
+    subprocess.run(["python", "other_script.py", modified_file_name])
+
+path = "/path/to/your/directory"  # Replace with the directory you want to watch
+
+def watch_directory():
+    event_handler = MyHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path, recursive=False)
+    observer.start()
+
+# Schedule the watch_directory function to run every second
+schedule.every(1).seconds.do(watch_directory)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+
+
+
+
+
