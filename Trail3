@@ -1,1 +1,49 @@
+import time
+import os
+import logging
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import shutil
 
+# Set up logging
+logging.basicConfig(filename='monitoring_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
+
+class MyHandler(FileSystemEventHandler):
+    def on_modified(self, event):
+        if not event.is_directory:
+            # Backup the file to another location
+            source_file = event.src_path
+            backup_dir = '/path/to/backup_directory'
+            shutil.copy(source_file, backup_dir)
+
+            # Rename the file
+            filename = os.path.basename(source_file)
+            new_filename = filename.replace(' ', '_')
+            os.rename(source_file, os.path.join(event.src_path, new_filename))
+
+            # Move the renamed file to directory_2
+            moved_file = os.path.join('/path/to/directory_2', new_filename)
+            shutil.move(os.path.join(event.src_path, new_filename), moved_file)
+
+            # Log the file processing
+            logging.info(f'Received, backed up, and moved: {new_filename}')
+    
+    def on_deleted(self, event):
+        if event.is_directory and not os.listdir(event.src_path):
+            logging.info('Directory is empty')
+
+if __name__ == "__main__":
+    directory_to_watch = '/path/to/monitoring_directory'
+    event_handler = MyHandler()
+    observer = Observer()
+    observer.schedule(event_handler, directory_to_watch, recursive=True)
+    
+    observer.start()
+    
+    try:
+        while True:
+            time.sleep(10)
+    except KeyboardInterrupt:
+        observer.stop()
+    
+    observer.join()
